@@ -18,11 +18,7 @@ sock.bind(("", 8889))
 sock.sendto("command".encode(), tello_address)
 
 
-@app.post("/executeCommand/")
-async def execute_command(command: str):
-    if not command:
-        raise HTTPException(status_code=400, detail="Command is required")
-
+def send_command(command: str):
     try:
         # Send the command to the Tello drone
         sock.sendto(command.encode(), tello_address)
@@ -35,3 +31,21 @@ async def execute_command(command: str):
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"message": "Command executed successfully", "response": response}
+
+
+@app.post("/takeoff/")
+async def takeoff():
+    return send_command("takeoff")
+
+
+@app.post("/land/")
+async def land():
+    return send_command("land")
+
+
+@app.post("/executeCommand/")
+async def execute_command(command: str):
+    if not command:
+        raise HTTPException(status_code=400, detail="Command is required")
+
+    return send_command(command)

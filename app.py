@@ -1,7 +1,7 @@
 import asyncio
 import socket
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 
 app = FastAPI()
 
@@ -35,12 +35,57 @@ def send_command(command: str):
 
 @app.post("/takeoff/")
 async def takeoff():
+    """Take off"""
     return send_command("takeoff")
 
 
 @app.post("/land/")
 async def land():
+    """Land"""
     return send_command("land")
+
+
+@app.post("/stream/")
+async def stream(state: bool = True):
+    """Enable Video Stream"""
+    if state:
+        return send_command("streamon")
+
+    return send_command("streamoff")
+
+
+@app.post("/direction/")
+async def direction(
+    move: str = Query(
+        default=None, enum=["up", "down", "left", "right", "forward", "back"]
+    ),
+    dist: int = 20,
+):
+    """
+    Move in a direction.
+    Directions:
+     - up
+     - down
+     - left
+     - right
+     - forward
+     - back
+    Distances are measured in centimeters.
+    Direction values:
+     - 20 >= 500
+    """
+    if not move:
+        raise HTTPException(status_code=400, detail="A direction is required")
+
+    if not dist:
+        raise HTTPException(status_code=400, detail="A distance is required")
+
+    if 20 <= dist <= 500:
+        raise HTTPException(
+            status_code=400, detail="The distance must be between 20 and 500 cm"
+        )
+
+    return send_command(f"{move} {dist}")
 
 
 @app.post("/executeCommand/")

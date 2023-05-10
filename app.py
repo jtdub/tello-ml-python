@@ -33,6 +33,14 @@ def send_command(command: str):
     return {"message": "Command executed successfully", "response": response}
 
 
+@app.post("/execute/")
+async def execute_command(command: str):
+    if not command:
+        raise HTTPException(status_code=400, detail="Command is required")
+
+    return send_command(command)
+
+
 @app.post("/takeoff/")
 async def takeoff():
     """Take off"""
@@ -71,7 +79,7 @@ async def direction(
      - forward
      - back
     Distances are measured in centimeters.
-    Direction values:
+    Distance values:
      - 20 >= 500
     """
     if not move:
@@ -88,9 +96,26 @@ async def direction(
     return send_command(f"{move} {dist}")
 
 
-@app.post("/executeCommand/")
-async def execute_command(command: str):
-    if not command:
-        raise HTTPException(status_code=400, detail="Command is required")
+@app.post("/rotate/")
+async def rotate(move: str = Query(default="cw", enum=["cw", "ccw"]), dist: int = 1):
+    """
+    Rotate clockwise or counter clockwise
+    Direction:
+     - cw (clockwise)
+     - ccw (counter clockwise)
+    Distances are meatured in degrees.
+    Distance Values:
+     - 1 >= 360
+    """
+    if not move:
+        raise HTTPException(status_code=400, detail="A direction is required")
 
-    return send_command(command)
+    if not dist:
+        raise HTTPException(status_code=400, detail="A distance is required")
+
+    if 1 <= dist <= 360:
+        raise HTTPException(
+            status_code=400, detail="The distance must be between 1 and 360 degree"
+        )
+
+    return send_command(f"{move} {dist}")

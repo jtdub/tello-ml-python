@@ -119,3 +119,18 @@ async def rotate(move: str = Query(default="cw", enum=["cw", "ccw"]), dist: int 
         )
 
     return send_command(f"{move} {dist}")
+
+
+@app.post("/flip/")
+async def flip(move: str = Query(default="f", enum=["f", "b", "l", "r"])):
+    """
+    Flip in a direction.
+    - f: left
+    - b: back
+    - l: left
+    - r: right
+    """
+    if not move:
+        raise HTTPException(status_code=400, detail="A direction is required")
+
+    return send_command(f"flip {move}")

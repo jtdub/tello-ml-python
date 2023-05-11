@@ -3,7 +3,10 @@ import socket
 
 from fastapi import FastAPI, HTTPException, Query
 
-app = FastAPI()
+app = FastAPI(
+    title="Tello Drone REST API",
+    description="A REST API for interacting with Tello Drones",
+)
 
 # Define the Tello drone's IP and port
 tello_address = ("192.168.10.1", 8889)
